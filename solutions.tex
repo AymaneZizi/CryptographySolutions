@@ -1,0 +1,953 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+\hypersetup{pdfauthor={Cristian Adrián Ontivero}}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{gensymb} % for the degree symbol
+\usepackage{caption}
+\usepackage{float}
+\usepackage{color}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\usepackage{calc}
+\usepackage[hang,flushmargin]{footmisc} 
+
+% For the commutative diagrams.
+\usepackage{tikz-cd}
+
+\usepackage{tikz}
+\usetikzlibrary{automata, positioning, arrows,
+shapes,
+fit, % for the dashed boxes on Thompson's construction
+calc
+}
+\tikzset{%
+  node distance=3cm, % specifies the minimum distance between two nodes. Change if necessary.
+  every state/.style={thick}, % sets the properties for each ’state’ node
+  double distance=2.5pt,
+  shorten >= 2pt, shorten <= 2pt,
+  initial text=$ $,
+  every edge/.style={%
+    draw,->, >=stealth, auto, semithick
+  }
+}
+\graphicspath{{imgs/}}
+
+\definecolor{darkblue}{RGB}{49,130,189}
+
+\newlength\tindent
+\setlength{\tindent}{\parindent}
+\setlength{\parindent}{0pt}
+\renewcommand{\indent}{\hspace*{\tindent}}
+
+%These tell TeX which packages to use.
+\usepackage{array,epsfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsxtra}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+
+%Here I define some theorem styles and shortcut commands for symbols I use often
+\theoremstyle{definition}
+
+\newcommand{\lra}{\longrightarrow}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\surj}{\twoheadrightarrow}
+\newcommand{\graph}{\mathrm{graph}}
+\newcommand{\bb}[1]{\mathbb{#1}}
+\newcommand{\Z}{\bb{Z}}
+\newcommand{\Q}{\bb{Q}}
+\newcommand{\R}{\bb{R}}
+\newcommand{\C}{\bb{C}}
+\newcommand{\N}{\bb{N}}
+\newcommand{\M}{\mathbf{M}}
+\newcommand{\m}{\mathbf{m}}
+\newcommand{\MM}{\mathscr{M}}
+\newcommand{\HH}{\mathscr{H}}
+\newcommand{\Om}{\Omega}
+\newcommand{\Ho}{\in\HH(\Om)}
+\newcommand{\bd}{\partial}
+\newcommand{\del}{\partial}
+\newcommand{\bardel}{\overline\partial}
+\newcommand{\textdf}[1]{\textbf{\textsf{#1}}\index{#1}}
+\newcommand{\ip}[2]{\left\langle{#1},{#2}\right\rangle}
+\newcommand{\inter}[1]{\mathrm{int}{#1}}
+\newcommand{\exter}[1]{\mathrm{ext}{#1}}
+\newcommand{\cl}[1]{\mathrm{cl}{#1}}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\vol}{\mathrm{vol}}
+\newcommand{\cnt}{\mathrm{ct}}
+\newcommand{\osc}{\mathrm{osc}}
+\newcommand{\LL}{\mathbf{L}}
+\newcommand{\UU}{\mathbf{U}}
+\newcommand{\support}{\mathrm{support}}
+\newcommand{\AND}{\;\wedge\;}
+\newcommand{\OR}{\;\vee\;}
+\newcommand{\Oset}{\varnothing}
+\newcommand{\st}{\ni}
+\newcommand{\wh}{\widehat}
+
+\newcommand{\PS}{\mathcal{P}}
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\bra}[1]{\left[#1\right]}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\paren}[1]{\left(#1\right)}
+\newcommand{\ec}[1]{{\left[#1\right]}_{\sim}}
+\newcommand{\en}{\mathbin{\rotatebox[origin=c]{90}{\scriptsize $\circlearrowright$}}}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\cod}{\mathrm{cod~}}
+\newcommand{\dom}{\mathrm{dom~}}
+\newcommand{\im}{\mathrm{im~}}
+\newcommand{\thra}{\twoheadrightarrow}
+\newcommand{\emptystr}{\varepsilon}
+\newcommand{\emptylan}{\emptyset}
+\newcommand{\pdv}[2]{\partial_{#1} \bigl(#2\bigr)}
+
+% Crypto commands
+\newcommand{\Gen}{\mathsf{Gen}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+
+\newcommand{\Ms}{\mathcal{M}} % Message space
+\newcommand{\Ks}{\mathcal{K}} % Key space
+\newcommand{\Cs}{\mathcal{C}} % Ciphertext space
+\newcommand{\Adv}{\mathcal{A}} % Adversary
+\newcommand{\negl}{\mathrm{negl}} % Adversary
+\newcommand{\priveav}{\text{PrivK}_{\mathcal{A},\Pi}^\text{eav}}
+
+%Pagination stuff.
+\setlength{\topmargin}{-.3 in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textheight}{9.in}
+\setlength{\textwidth}{6.5in}
+\pagestyle{empty}
+
+% The problem environment is a regular ams theorem environment with "Problem"
+% text and some leading space to give some separation between the problems.
+\theoremstyle{definition}
+\newtheorem{problem-internal}{Problem}[subsection]
+\newenvironment{problem}{
+  \medskip
+  \begin{problem-internal}
+}{
+  \end{problem-internal}
+}
+
+% The solution environment is a proof environment with the "solution" text as
+% well as the following adjustments:
+% - No indent on paragraphs;
+% - A small amount of space between paragraphs.
+%
+% Note: The negative space at the beginning is to remove the space before the
+% first paragraph in the solution.
+%\newenvironment{solution}{%
+  %\begin{proof}[Solution]
+  %\vspace{-8px}
+  %\setlength{\parskip}{4px}
+  %\setlength{\parindent}{0px}
+%}{
+  %\end{proof}
+%}
+\theoremstyle{definition}
+\newtheorem{solution-internal}{}[subsection]
+\newenvironment{solution}{
+  \begin{solution-internal}
+}{
+  \end{solution-internal}
+}
+
+% The chngcntr ("change counter") package is used here so that subsection
+% numbers are written without the leading section number. This takes place in
+% the subsection headings as well as the theorem environment numbering.
+%
+% Before:
+% 1. Section
+% 1.1. Subsection
+% Problem 1.1.1. What is 1 + 1?
+% Problem 1.1.2. What is 1 + 2?
+%
+% After:
+% 1. Section
+% 1. Subsection
+% Problem 1.1. What is 1 + 1?
+% Problem 1.2. What is 1 + 2?
+\usepackage{chngcntr}
+\counterwithout{subsection}{section}
+
+% Renewing the \thesection command changes the section numbers to roman
+% numerals. This matches the style of the Aluffi textbook.
+%
+% Before:
+% 1. Section
+% 1.1. Subsection
+%
+% After:
+% I. Section
+% I.1. Subsection
+%\renewcommand{\thesection}{\Roman{section}} 
+%\renewcommand{\thesubsection}{\Roman{subsection}} 
+
+\begin{document}
+
+\section*{Chapter 1}
+\setcounter{section}{1}
+\setcounter{subsection}{1}
+
+% Problem 1.1
+\begin{solution}
+  abcdefghijklmnopqrstuvwxyz =\gg hcjkfeyvbuxzplomtgwqiasdrn
+
+Decryption the ciphertext provided :
+
+CRYPTOGRAPHICSYSTEMSAREEXTREMELYDIFFICULTTOBUILDNEVERTHELESSF
+ORSOMEREASONMANYNONEXPERTSINSISTONDESIGNINGNEWENCRYPTIONSCHEM
+ESTHATSEEMTOTHEMTOBEMORESECURETHANANYOTHERSCHEMEONEARTHTHEUNF
+ORTUNATETRUTHHOWEVERISTHATSUCHSCHEMESAREUSUALLYTRIVIALTOBREAK
+\end{solution}
+
+\begin{solution}
+  Denoting $\set{0, \dots, 25}$ by $\Z_{26}$, we have:
+  \begin{itemize}
+    \item $\Gen$: outputs a uniform key $k$ from the set of bijections
+      $p\colon\Z_{26} \to \Z_{26}$, where we are associating each letter of the
+      English alphabet, in order, with the correspoding number in $\Z_{26}$.
+    \item $\Enc$: The encryption of the message $m = m_1\cdots m_{\ell}$, where
+      $m_i \in \Z_{26}$ with key $k$ is given by:
+      \[ \Enc_k(m_1 \cdots m_{\ell}) = c_1 \cdots c_{\ell}\]
+      where $c_i = k(m_i)$, i.e.\ we apply bijection $k$ to $m_i$.
+    \item $\Dec$: The decryption of the ciphertext $c = c_1 \cdots c_{\ell}$,
+      where $c_i \in \Z_{26}$ with key $k$ is given by:
+      \[ \Dec_k(c_1 \cdots c_{\ell}) = k^{-1}(c_1) \cdots k^{-1}(c_{\ell}) = m_1 \cdots
+      m_{\ell}\]
+      where $k^{-1}$ is the inverse of the function k, which exists because $k$
+      is bijective.
+  \end{itemize}
+\end{solution}
+
+% 1.3
+\begin{solution}
+  TODO
+\end{solution}
+
+% 1.4
+\begin{solution}
+  TODO
+\end{solution}
+
+\begin{solution}
+  Shift cipher: the encryption of a single character sufficies, since $c = m +
+  k \mod 26$, so $k = c - m \mod 26$.
+  
+  Monoalphabetic substitution: if the alphabet contains $n$ characters, at least
+  $n-1$ distinct characters are necessary to recover the key (as the
+  $n^{\text{th}})$ character is determined once the other $n-1$ characters are).
+  By choosing $m = m_1 \cdots m_{n - 1}$ with $m_1 \neq m_2 \neq \cdots \neq m_{n-1}$, we have $c = c_1 \cdots c_{n-1} = k(m_1) \cdots k(m_{n-1})$, and we may find bijection k.
+
+  Vigenère: given a key $k$ of length $n$, $n$ characters suffice to recover the
+  key, as each part of it can be recovered as in the shift cipher.
+\end{solution}
+\begin{solution}
+  Since the distance that each character is shifted by is fixed, the attacker
+  can choose {\tt abcd} if the ciphertext contains consecutive characters (e.g.
+  {\tt mnop}) and {\tt bedg} otherwise.
+\end{solution}
+
+\begin{solution}
+  It is not possible with period 2. With period 3:
+
+  \begin{center}
+\setlength{\tabcolsep}{2pt}
+  \begin{tabular}{cccc p{5mm} cccc}
+    0 & 1 & 2 & 3 & & 1 & 4 & 3 & 6 \\
+    a & b & c & d & & b & e & d & g \\
+    $k_1$ & $k_2$ & $k_3$ & $k_4$ & & $k_1$ & $k_2$ & $k_3$ & $k_4$ \\
+  \end{tabular}
+  \end{center}
+
+  %Thus, the message is {\tt abcd} iff $c_4 -c_1 \cong 3 \pmod 26$.
+  As for Vigenère with period 4, $\abs{\Ks} = \abs{\Ms}$, hence we have perfect
+  secrecy.
+\end{solution}
+
+% 1.8
+\begin{solution}
+  TODO
+\end{solution}
+
+\section*{Chapter 2}
+\setcounter{section}{2}
+\setcounter{subsection}{2}
+\setcounter{solution-internal}{0}
+\begin{solution}
+  TODO
+\end{solution}
+\begin{solution}
+$\Enc$ takes a message $m \in \Ms$ and a key $k \in \Ks$, and is randomised (it
+gets a number of bits from some random tape that it uses as input as well).
+Instead of implicitly getting the random bits, we make it explicit passing them
+as input, by redifining the key space to $\Ks \times \mathcal{R}$ (where
+$\mathcal{R}$ is the set of all possible random tapes of the aximal length we
+could need):
+
+Thus, $\Enc$ becomes deterministic, as it has all the randomness it needs in the
+new-style key.
+\end{solution}
+
+% 2.3
+\begin{solution}
+  Consider a scheme with $1$ bit of plaintext, $3$ bits of key, and $2$ bits of
+  ciphertext. The two bits of ciphertext, $c_0$ and $c_1$, are
+  obtained as follows:
+  \begin{align*}
+    c_0 &= m_0 \oplus k_0 \\
+    c_1 &= (k_2 \AND k_1) \oplus m_0 \oplus k_0
+  \end{align*}
+  The possible ciphertexts can be seen in the following table:
+  \begin{table}
+    \begin{tabular}{r|c|c}
+       & $0$ & $1$ \\
+      \hline
+      $(0,0,0)$ & $(0,0)$ & $(1,1)$ \\
+      $(0,0,1)$ & $(0,0)$ & $(1,1)$ \\
+      $(0,1,0)$ & $(0,0)$ & $(1,1)$ \\
+      $(0,1,1)$ & $(0,1)$ & $(1,0)$ \\
+      $(1,0,0)$ & $(1,1)$ & $(0,0)$ \\
+      $(1,0,1)$ & $(1,1)$ & $(0,0)$ \\
+      $(1,1,0)$ & $(1,1)$ & $(0,0)$ \\
+      $(1,1,1)$ & $(1,0)$ & $(0,1)$
+    \end{tabular}
+  \end{table}
+
+  The scheme is perfectly secure:
+  \begin{align*}
+    P[M = 0|C = (0,0)] &= \frac{P[M = 0] \cdot \left(P[K = (0,0,0)] + P[K=(0,0,1)] + P[K=(0,1,0)]\right)}{P[C=(0,0)]} \\
+                       &= \frac{P[M = 0] \cdot \frac{3}{8}}{\frac{6}{16}} =
+    P[M=0] \\[16pt]
+    P[M = 0|C = (0,1)] &= \frac{P[M = 0] \cdot P[K = (0,1,1)]}{P[C=(0,1)]}  \\
+                       &= \frac{P[M = 0] \cdot \frac{1}{8}}{\frac{2}{16}} =
+    P[M=0] \\
+    \makebox[\widthof{etc.}]{\vdots} & \\
+    etc. &
+    \end{align*}
+  
+    but $\frac{3}{8} = P[C = (0,0)] \neq P[C=(0,1)] = \frac{1}{8}$.
+\end{solution}
+
+% 2.4
+\begin{solution}
+  Assume that the encryption scheme is perfectly secret, and fix messages $m_0,
+  m_1 \in \Ms$ and a ciphertext $c \in \Cs$. By Lemma 2.2 of the $1^{\text{st}}$
+  edition of the book, we have:
+  \[ P[C=c | M = m_0] = P[C = c] = P[C = c | M = m_1] \]
+  Completing the proof of the ``only if'' ($\Rightarrow$) direction.
+\end{solution}
+Note that $P[\Enc_k(m) = c] = P[C=c|M=m]$, as explained in page 30. It is also
+worth pointing that Lemma 2.2 is an equivalent formulation of perfect secrecy, stating:
+
+% TODO use some definition environment here
+An encryption scheme $(\Gen, \Enc, \Dec)$ over a message space $\Ms$ is
+perfectly secret iff for every probability distribution over $\Ms$, every
+message $m \in \Ms$, and every ciphertext $c \in \Cs$:
+\[ P[C = c | M = m] = P[C = c] \]
+
+\begin{solution}
+  We need to prove that an encryption scheme $\Pi$ is perfectly secret iff it is
+  perfectly indistinguishable.
+  \begin{item}
+    \item[$(\Rightarrow):$] In what follows, we make the assumption that the
+      adversary is deterministic. Suppose $\Pi$ is perfectly secret. We need
+      to show that $P[\priveav = 1] = \frac{1}{2}$.
+      \begin{align*}
+        P[\priveav = 1] &= P[b' = b] \\
+                        &= P[b' = 0|M = m_0] \cdot P[M=m_0] + P[b'=1|M = m_1]\cdot P[M=m_1] \\
+                        &= \frac{1}{2} \left( P[b' = 0|M = m_0] + P[b'=1|M = m_1] \right)
+      \end{align*}
+      Note that in the last step we used that $P[M = m_0] = P[M = m_1] =
+      \frac{1}{2}$. Essentially what the adversary does is try to partition the
+      ciphertext space $\Cs$ into two subsets $\Cs_0, \Cs_1$ such that $\Cs =
+      \Cs_0 \cup \Cs_1$ and $\Cs_0 \cap \Cs_1 = \emptyset$. If the attacker gets
+      $c \in \Cs_0$ it outputs 0, else if $c \in \Cs_1$, it outputs 1. We thus
+      proceed:
+      \begin{align*}
+        & \frac{1}{2}\left( P[b'=0|M=m_0] + P[b'=1|M=m_1]\right) \\
+        =& \frac{1}{2}\left(\sum_{c \in \Cs_0} P[C=c|M=m_0] + \sum_{c \in \Cs_1} P[C=c|M=m_1]\right) \\
+        =& \frac{1}{2}\left(\sum_{c \in \Cs_0} P[C=c] + \sum_{c \in \Cs_1} P[C=c]\right) \\
+        =& \frac{1}{2}\left(P[c \in \Cs_0] + P[c \in \Cs_1]\right) = \frac{1}{2}
+      \end{align*}
+      Note that the second and third lines are equal by an equivalent
+      formulation of perfect secrecy, and the last equality holds since $P[c \in
+      \Cs_0] + P[c \in \Cs_1] = 1$, because $\Cs_0$ and $\Cs_1$ are mutually
+      exclusive and exhaustive.
+    \item[$(\Leftarrow):$] We prove the contrapositive, i.e.\ $\neg
+      \text{Perfect secrecy} \Rightarrow \neg \text{Adversarial
+      indistinguishability}$. Suppose $\Pi$ is not perfectly secret, then
+      $\exists m_0',m_1' \in \Ms$ and $c' \in \Cs$ such that:
+      \[ P[C=c'|M=m_0'] \neq P[C=c'|M=m_1'] \]
+      (Using an equivalent formulation to the original perfect secrecy).
+      Let $\Adv$ be an adversary that chooses $m_0'$ and $m_1'$. If it receives
+      $c'$, $\Adv$ outputs $b'=0$, otherwise $b' \leftarrow \set{0,1}$ (the
+      randomness is to ensure we can separate out the case when $C=c'$).
+
+      \begin{align*}
+        P[\priveav = 1] &= P[b=b']\\
+                        &= P[b=b'|M=m_0']P[M=m_0'] + P[b=b'|M=m_1']P[M=m_1'] \\
+                        &= \frac{1}{2}\left(P[b=b'|M=m_0'] + P[b=b'|M=m_1'] \right) \\
+        P[b=b'|M=m_0'] &= P[C=c'|M=m_0']\cdot P[b=b'|M=m_0',C=c']\\
+                       &+ P[C\neq c'|M=m_0']\cdot P[b=b'|M=m_0', C\neq c'] \\
+        &= P[C=c'|M=m_0']\cdot 1 + P[C\neq c'|M=m_0']\cdot \frac{1}{2} \\
+        P[b=b'|M=m_1'] &= P[C=c'|M=m_1']\cdot P[b=b'|M=m_1',C=c']\\
+                       &+ P[C\neq c'|M=m_1']\cdot P[b=b'|M=m_1', C\neq c'] \\
+        &= P[C=c'|M=m_1']\cdot 0 + P[C\neq c'|M=m_1']\cdot \frac{1}{2} \\
+        &= P[C\neq c'|M=m_1']\cdot \frac{1}{2}
+      \end{align*}
+    Substituting back:
+      \begin{align*}
+        P[\priveav = 1] &= \frac{1}{2}\left( P[C=c'|M=m_0'] + P[C\neq c'|M=m_0'] \frac{1}{2} + P[C\neq c'|M=m_1'] \frac{1}{2}\right )  \\
+                        &= \frac{1}{2} P[C=c'|M=m_0'] + \frac{1}{4}\left(1 - P[C
+      = c'|M=m_0']\right) + \frac{1}{4} P[C\neq c'|M=m_1'] \\
+                        &= \frac{1}{4} + \frac{1}{4}\left(P[C=c'|M=m_0'] +  P[C\neq c'|M=m_1'] \right) \\
+                        &\neq \frac{1}{4} + \frac{1}{4}\left(P[C=c'|M=m_1'] +  P[C\neq c'|M=m_1'] \right) \\
+                        &=\frac{1}{2}
+      \end{align*}
+      The inequality comes from supposing that there is no perfect secrecy.
+      Therefore:
+      \[ P[\priveav = 1] \neq \frac{1}{2} \]
+      Hence $\Pi$ does not have adversarial indistinguishability.
+  \end{item}
+\end{solution}
+\begin{solution}
+  $ $ 
+  \begin{enumerate}[label=\alph*.]
+  \item Take $m = 0$ and $c = 0$ as a counterexample. Then we have:
+
+  \begin{minipage}{.45\textwidth}
+  \begin{align*}
+    P[C=c | M=m] &= P[\Enc_k(m)=c] \\
+                 &= P[m + K \equiv c \pmod 5] \\
+                 &= P[K \equiv c -m \pmod 5] \\
+                 &= \frac{2}{6} = \frac{1}{3} 
+  \end{align*}
+  \end{minipage}\hfill%
+  \begin{minipage}{.45\textwidth}
+    \begin{center}
+      \begin{tabular}{cr|ccccc}
+        & &\multicolumn{5}{c}{$m$ (message)} \\
+        & & 0 & 1 & 2 & 3 & 4 \\
+        \cline{2-7}
+        & 0 & 0 & 1 & 2 & 3 & 4 \\
+        & 1 & 1 & 2 & 3 & 4 & 0 \\
+        & 2 & 2 & 3 & 4 & 0 & 1 \\
+        \smash{\rotatebox[origin=c]{90}{$k$ (key)}} & 3 & 3 & 4 & 0 & 1 & 2 \\
+        & 4 & 4 & 0 & 1 & 2 & 3 \\
+        & 5 & 0 & 1 & 2 & 3 & 4
+      \end{tabular}
+    \end{center}
+    \end{minipage}
+    \vspace{10pt}
+
+  But $P[C=c] = \frac{6}{36} = \frac{1}{6}$. Thus, we found a pair $m \in \Ms$
+  and $c \in \Cs$ for which $P[C=c|M=m] \neq P[C=c]$, so the scheme is not
+  perfectly secret.
+\item TODO
+\end{enumerate}
+\end{solution}
+\begin{solution}
+  By the contrapositive of theorem 2.10, if $\abs{\Ks} < \abs{\Ms}$ then the
+  encryption scheme is not perfectly secret.
+
+  Alternatively, we can see that for any $m \in \Ms$ and $c \in \Cs$ such that
+  $m = c$, $P[C=c|M=m] = 0$ (since we are missing precisely the key that
+  makes $c = m \oplus k = m$). However, $P[C=c] \neq 0$. The intuition for why
+  key $0^{\ell}$ is no different from other keys is that $c = 0^{\ell} \oplus
+  m = m$ is equivalent to $c = k' \oplus m'$, for any $k' = c \oplus m'$, and
+  there is no reason why an adversary should assume that the key is
+  $0^{\ell}$ instead of $k'$.
+\end{solution}
+\begin{solution}
+  $ $
+  \begin{enumerate}[label=\alph*.]
+    \item \begin{align*}
+    P[\priveav = 1] &= P[b=b'] \\
+                    &= P[b=0] \cdot P[\text{$\Adv$ outputs 0} | b = 0] + P[b=1]
+    \cdot P[\text{$\Adv$ outputs 1} | b=1] \\
+    &= \frac{1}{2} \left( P[\text{$\Adv$ outputs 0}|b=0] + P[\text{$\Adv$
+outputs 1}|b=1]\right)
+  \end{align*}
+  Then, we have:
+  \[
+    P[\text{$\Adv$ outputs 0} | b = 0] =
+    \frac{1}{3}\cdot\underbrace{\frac{26}{26}}_{(a)} +
+    \frac{1}{3}\cdot\underbrace{\frac{26}{26^2}}_{(b)} + \frac{1}{3}\cdot
+    \underbrace{\frac{26^2}{26^3}}_{(c)} =
+    \frac{14}{39}
+\]
+  where:
+  \begin{enumerate}[label=\alph*.]
+    \item when $\abs{k} = 1$, $\Adv$ always wins.
+    \item when $\abs{k} = 2$, $\Adv$ wins when both symbols of the key equal
+      each other ($k_1 = k_2$). This happens in $\frac{26}{26^2}$ keys.
+    \item when $\abs{k} = 3$, $\Adv$ wins when two symbols of the key equal
+      each other. This happens in $\frac{26^2}{26^3}$ keys.
+  \end{enumerate}
+  Also:
+  \[
+    P[\text{$\Adv$ outputs 1} | b = 1] =
+    \frac{1}{3}\cdot\underbrace{\frac{26}{26}}_{(a)} +
+    \frac{1}{3}\cdot\underbrace{\frac{26\cdot 25}{26^2}}_{(b)} + \frac{1}{3}\cdot
+    \underbrace{\frac{26^2 \cdot 25}{26^3}}_{(c)} = \frac{38}{39}
+\]
+  where:
+  \begin{enumerate}[label=\alph*.]
+    \item when $\abs{k} = 1$, $\Adv$ always wins.
+    \item when $\abs{k} = 2$, $\Adv$ loses when $k_1 = k_2 + 1$ (since
+      $\Enc_k(abb) = c_1c_1_c_3$). This happens in 26 cases, so we care about
+      the remaining $26^2-26 = 26\cdot 25$ of the $26^2$ cases.
+    \item when $\abs{k} = 3$, $\Adv$ loses oncd more when the symbols of $k$ are
+      consecutive, leading to $26^3-26^2 = 26^2\cdot 25$ of the $26^3$ cases.
+  \end{enumerate}
+  Thus, substituting in our derivation:
+  \[ \frac{1}{2}\left( \frac{14}{39} + \frac{38}{39} \right) = \frac{2}{3}\]
+
+\item TODO
+\end{enumerate}
+\end{solution}
+\begin{solution}
+  $ $
+  \begin{enumerate}[label=\alph*.]
+    \item The easiest proof is by Shannon's theorem: we have $\abs{\Cs} = \abs{\Ms} =
+    \abs{\Ks} = 26$, each key in $\Z_{26}$ is chosen with equal probability
+    ($\frac{1}{26}$), and for every $m \in \Z_{26}$ and $c \in \Z_{26}$ there is
+    a unique key $k$ such that $\Enc_k(m) = c$, namely $k = c-m \pmod 26$.
+    Alternatively, we can show that for each $m, c$:
+
+    \[ P[C=c|M=m] = P[\Enc_k(m) = c] = P[K=c-m \pmod 26] = \frac{1}{26} \]
+
+    Thus $\forall m_0, m_1 \in \Ms$ and $\forall c \in \Cs$, $P[C=c|M=m_0] =
+    P[C=c|M=m_1]$, and we have perfect secrecy.
+  \item By the limitation of perfect secrecy, $\abs{\Ms} \leq \abs{\Ks} = n!$,
+    where $n$ is the number of symbols in the alphabet ($n = 26$ for English);
+    the factorial is because that's the number of permutations on an $n$-element
+    set (in particular, $\Z_{26}$). So we have an upper bound for $\abs{\Ms}$.
+    Now take the set $\Ms$ of all strings of 26 characters without repeating
+    any. Clearly $\abs{\Ms} = 26!$. Once more, we use Shannon's theorem:
+    \begin{enumerate}[label=\arabic*.]
+      \item $\abs{\Ks}  = \abs{\Ms}$, but also $\abs{\Ms} = \abs{\Cs}$ since any
+        permutation on characters will map a string of 26 nonrepeated letters to another.
+      \item Every key is chosen with equal probability, namely $\frac{1}{26!}$.
+      \item For every $m \in \Ms$ and $c \in \Cs$, $\exists! k \in Ks$ such that
+        $\Enc_k(m) = c$, since $m$ and $c$ define a unique permutation on all
+        the letters of the alphabet.
+    \end{enumerate}
+
+    Therefore, the largest message space $\Ms$ for which the monoalphabetic
+    cipher provides perfect secrecy is $n!$, for an $n$-element set.
+  \item For an $n$-element alphabet, the Vigenère cipher using (fixed) period
+    $t$ has $\abs{\Ks} = n^t$. If we encrypt messages of length $t$, then
+    $\abs{\Ms} = n^t$ too. Clearly, we also have $\abs{\Cs} = n^t$.
+
+    Again, by Shannon's theorem we see that every key is chosen with equal
+    probability ($\frac{1}{n^t}$), and for each pair of plaintext and ciphertext,
+    there is a unique key such that $\Enc_k(m) = c$.
+  \end{enumerate}
+\end{solution}
+\begin{solution}
+  A simple way is the following: Let $\Pi$ be a scheme satisfying definition
+  2.5. Then by Lemma 2.6 $\Pi$ is perfectly secret, so by theorem 2.10,
+  $\abs{\Ks} \geqslant \abs{\Ms}$. As for an $\Adv$ for which $P[\priveav = 1] >
+  \frac{1}{2}$, let $\Pi$ be an arbitrary encryption scheme with $\abs{\Ks} <
+  \abs{\Ms}$. 
+  
+  TODO finish
+\end{solution}
+
+\begin{solution}
+  Let $\Ms = \set{0,1}^n$ and $\Ks = \set{0,1}^{n-t}$, with $\Enc_k(m) = [m]_{1,
+  n-t} \oplus k$, i.e.\ xor the first $(n-t)$ bits of $m$ with the key $k$.
+  $\Dec_k(c) = (c || 0^t) \plus (k || r)$, where $r$ is a random pad of $t$
+  bits. Since we have $\frac{1}{2^t}$ chances that $r$ is precisely the missing
+  part of the message, $P[\Dec_k(\Enc_k(m)) = m] = \frac{1}{2^t}$, so 
+  $P[\Dec_k(\Enc_k(m)) = m] \geqslant \frac{1}{2^t}$. The perfect secrecy of
+  this scheme follows from the proof of the one-time pad (this is exactly a
+  one-time pad on the first $(n-t)$ bits of the message). Lower bound: $2^{n-t}
+  = \abs{\Ms}\cdot 2^{-t} \leqslant \abs{\Ks}$.
+\end{solution}
+
+\section*{Chapter 3}
+\setcounter{subsection}{3}
+\setcounter{solution-internal}{0}
+
+\begin{solution}
+  $ $
+  \begin{enumerate}
+    \item Let $p$ be a positive polynomial. Since $2p$ is also a positive polynomial and
+  $\negl_1$ and $\negl_2$ are negligible:
+
+  \[ \exists N_1, N_2 \left(\forall n\geqslant N_1 \left(\negl_1(n) <
+        \frac{1}{2p(n)} \right) 
+\AND \forall n \geqslant N_2 \left(\negl_2(n) < \frac{1}{2p(n)} \right) \right)\]
+
+Choose $N_3 = \max(N_1, N_2)$, then $\forall n \geqslant N_3$ we have:
+
+\[ \negl_3(n) = \negl_1(n) + \negl_2(n) < \frac{1}{2p(n)} + \frac{1}{2p(n)} =
+\frac{1}{p(n)} \]
+\item Let $p, q$ be two positive polynomials. Since $p\cdot q$ is also a
+  positive polynomial and $\negl_1$ is negligible:
+  \[ \exists N_1 \left( \forall n \geqslant N_1 \left( \negl_1 <
+  \frac{1}{q(n)p(n)} \right)\right) \]
+  Then $\forall n \geqslant N_1 \left( \negl_4 = p(n)\cdot \negl_1(n) <
+  \frac{1}{q(n)}\right)$.
+  \end{enumerate}
+\end{solution}
+\begin{solution}
+  Let $q(n)$ be a polynomial such that for any $k \leftarrow \Gen(1^n)$,
+  $\abs{\Enc_k(0)} \leqslant q(n)$. Such a polynomial exists because the
+  encryption algorithm must run in an amount of time polynomial in n. Since the
+  maximum encrypted length of 0 is bounded by $q(n)$, we would like our
+  adversary to choose $m_0 = 0$, and $m_1$ so that $m_1$ will always encrypt to
+  a string of length greater than $q(n)$. If the adversay can to this, it
+  becomes trivial to determine which message was encrypted, i.e.\ $P[\priveav =
+  1] = 1$, thus the definition cannot be satisfied. Consider all strings of
+  length $q(n) + 2$. % Isn't taking q(n) + 1 enough?
+  Since there are $2^{q(n) + 2}$ such strings, and fewer than $2^{q(n) + 1}$
+  strings of length  $\leqslant q(n)$, there must be some string $s \in
+  \set{0,1}^{q(n) + 2}$ that can only encrypt to strings of length $> q(n)$. If
+  the adversary chooses $m_1 = s$, then he can always win the
+  indistinguishability experiment, so $\Pi$ cannot satisfy the definition, as
+  desired.
+\end{solution}
+
+% Problem 3.3. See HAL2
+\begin{solution}
+  Let $\Pi = \left( \Gen, \Enc, \Dec \right)$ be a scheme that is secure with
+  respect to the original defintion 3.8 (for messages of equal length).
+  Construct a scheme $\Pi' = \left( \Gen, \Enc', \Dec'\right)$ such that:
+  \begin{itemize}
+    \item Given $m$, with $\abs{m} \leqslant \ell(n)$, then:
+      \[ 
+      \Enc'(m) = \left\{ 
+        \begin{array}{ll}
+          \Enc(0^{\ell - \abs{m} - 1} 1||m), & \text{if $\abs{m} < \ell(n)$} \\
+          \Enc(m), & \text{if $\abs{m} = \ell(n)$}
+        \end{array}
+      \]
+    \item $\Dec'$ applies $\Dec$ to the ciphertext, and parses the result as
+      $0^t1||m$ for $t \geqslant 0$. It outputs $m$.
+  \end{itemize}
+  A complete answer to this exercise requires a proof showing that the existence
+  of an adversary breaking $\Pi'$ with respect to the modified definitions
+  implies the existence of an adversary breaking $\Pi$ with respect to
+  definition 3.8.
+
+  Informally: Given an adversary $\Adv'$ who breaks $\Pi'$, we construct an
+  adversary $\Adv$ who takes the pair of plaintexts $m_0, m_1$ output by $\Adv'$
+  and pads them in the same way as $\Enc'$ would. Then it outputs the padded
+  messages to be encrypted. Observe that $\Adv$ outputs equal length messages,
+  as required. Furthermore, if $\Adv'$ can correctly guess $b$ with probability
+  greater than $\frac{1}{2}$, then this guess will also be correct for $\Adv$
+  with the same probability.
+\end{solution}
+\begin{solution}
+  Assume the scheme has indistinguishabile encryption in the presence of an
+  eavesdropper (def 3.8), i.e.:
+
+  \[ P[\priveav(n) = 1] \leqslant \frac{1}{2} + \neql(n) \] 
+
+  TODO finish
+\end{solution}
+
+\section*{Chapter 4}
+\setcounter{section}{4}
+\setcounter{subsection}{4}
+\setcounter{solution-internal}{0}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  Let F be a pseudorandom function. Show that each of the following MACs is insecure, even if used to authenticate fixed-length messages. In each case Gen outputs a uniform $k \in \{0, 1\}^n$. Let \langle $i$ \rangle 
+  $denote an n/2-bit$
+  \hspace{1mm} $encoding of the integer$ \hspace{1mm} $$i$$.
+\newline
+  
+  1. To authenticate a message $$ m = m_1, \ldots ,m_l $$ where $$m_i \in \{0, 1\}^n$$, compute $$t := F_k(m_1) \oplus \cdots \oplus F_k(m_l)$$.
+  
+  2. To authenticate a message $$ m = m_1, \ldots ,m_l $$ where $$m_i \in \{0, 1\}^{n/2}$$, compute $$t := F_k(\langle 1 \rangle || m_1) \oplus \cdots \oplus F_k(\langle l \rangle || m_l)$$.
+  
+  3. To authenticate a message $$ m = m_1, \ldots ,m_l $$ where $$m_i \in \{0, 1\}^{n/2}$$, choose uniform $$r \leftarrow \{0, 1\}^n$$, compute $$t := F_k(r) \oplus F_k(\langle 1 \rangle || m_1) \oplus \cdots \oplus F_k(\langle l \rangle || m_l)$$, and let the tag be $$\langle r, t \rangle $$
+
+\end{solution}
+\begin{solution}
+\noindent
+   Let F be a pseudorandom function. Show that each of the following MACs is insecure, even if used to authenticate fixed-length messages.In each case Gen outputs a uniform $k \in \{0, 1\}^n$. Let \langle $i$ \rangle 
+  $denote an n/2-bit$
+  \newline
+  $encoding of the integer$ \hspace{1mm} $$i$$.
+\newline
+
+1. To authenticate a message $$ m = m_1, \ldots ,m_l $$ where $$m_i \in \{0, 1\}^n$$, compute $$t := F_k(m_1) \oplus \cdots \oplus F_k(m_l)$$.
+2. To authenticate a message $$ m = m_1, \ldots ,m_l $$ where $$m_i \in \{0, 1\}^{n/2}$$, compute $$t := F_k(\langle 1 \rangle || m_1) \oplus \cdots \oplus F_k(\langle l \rangle || m_l)$$.
+3. To authenticate a message $$ m = m_1, \ldots ,m_l $$ where $$m_i \in \{0, 1\}^{n/2}$$, choose uniform $$r \leftarrow \{0, 1\}^n$$, compute $$t := F_k(r) \oplus F_k(\langle 1 \rangle || m_1) \oplus \cdots \oplus F_k(\langle l \rangle || m_l)$$, and let the tag be $$\langle r, t \rangle $$
+
+Answer :
+
+* Part 1 :
+
+Reorder the blocks in "m" and the tag doesn't change.
+
+* Part 2 : 
+
+Query
+
+* $$m^1 = m_1 || m_2$$, tag $$t_1 = F_k(\langle 1 \rangle || m_1) \oplus F_k(\langle 2 \rangle || m_2) $$
+* $$m^2 = m_3 || m_2$$, tag $$t_2 = F_k(\langle 1 \rangle || m_3) \oplus F_k(\langle 2 \rangle || m_2) $$
+* $$m^3 = m_3 || m_4$$, tag $$t_3 = F_k(\langle 1 \rangle || m_3) \oplus F_k(\langle 2 \rangle || m_4) $$
+
+Thus $$ m^* = m^1 \oplus m^2 \oplus m^3 = m_1 || m_4$$, tag $$t = t_1 \oplus t_2 \oplus t_3 = F_k(\langle 1 \rangle || m_1) \oplus F_k(\langle 2 \rangle || m_4) $$.
+\newline
+* $$Part 3 :$$
+\newline
+Let $$m \in \{0, 1\}^{n/2}$$. When choosing $$r = \langle 1 \rangle || m$$, $$t = F_k(r) \oplus F_k(\langle 1 \rangle || m) = 0^n$$.
+
+Thus $$ t = \left\langle \langle 1 \rangle || m, 0^n \right\rangle $$ will be a valid tag for "m".
+\end{solution}
+\begin{solution}
+  Let "F" be a pseudorandom function. Show that the following MAC for messages of length "2n" is insecure: Gen outputs a uniform $$k \in \{0, 1\}^n$$. To authenticate a message $$m_1 || m_2$$ with $$|m_1| = |m_2| = n$$, compute the tag $$F_k(m_1) || F_k(F_k(m_2))$$.
+  
+  Answer: 
+  
+  Query
+
+* $$m^1=m^*_1||m^*_1$$, $$t^1= t^1_1||t^1_2 = F_k(m^*_1) || F_k(F_k(m^*_1)) $$
+* $$m^2=m^*_2||m^*_2$$, $$t^2= t^2_1 || t^2_2 = F_k(m^*_2) || F_k(F_k(m^*_2)) $$
+
+Hence for $$m^*=m^*_1||m^*_2$$, $$t^* = t^1_1||t^2_2$$
+
+
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\begin{solution}
+  Prove that the following modifications of basic CBC-MAC do not yield a secure MAC (\,even for fixed-length messages)\,:
+
+1. Mac outputs all blocks $$t_1, \ldots , t_l$$rather than just $$t_l$$. (\,Verification only checks whether $t_l$ is correct.)\,
+
+2. A random initial block is used each time a message is authenticated. That is, choose uniform $$t \in \{0, 1\}^n$$, run basic CBC-MAC over the “message” $$t_0,m_1, \ldots ,m_l$$, and output the tag $$ \langle t_0, t_l \rangle$$. Verification is done in the natural way.
+
+The Answer :
+
+* Part 1:
+
+Query
+
+* $$m^1 = B_0 || B_1$$, $$t^1 = t_0 || t_1$$
+* $$m^2 = B_2 || B_3$$, $$t^2 = t_2||t_3$$
+
+We know $$F_k(B_0) = t_0$$ and $$F_k(B_2) = t_2$$. Hence 
+
+$$
+MAC_k(B_0 || B^*_2) = F_k(B_0) || F_k(F_k(B_0) \oplus B^*_2) = t_0 || F_k(t_0 \oplus B^*_2)
+$$
+
+Let $$t_0 \oplus B^*_2 = B_2$$, i.e., $$B^*_2 = t_0 \oplus B_2$$. Then
+
+$$
+MAC_k(B_0 || t_0 \oplus B_2) = t_0 || F_k(t_0 \oplus t_0 \oplus B_2) = t_0 || F_k(B_2) = t_0 || t_2
+$$
+
+Therefore, $$\langle B_0 || t_0 \oplus B_2, t_0 || t_2 \rangle$$ is a valid pair of message and tag.
+
+* Part 2:
+
+Query
+
+* $$m^1 = B_0 || B_1$$, $$t^1 = \langle r_1, t_1 \rangle$$
+* $$ m^2 = B_2 || B_3 $$, $$ t^2 = \langle r_2, t_2 \rangle $$
+
+Hence for $$m^* = B_0 || B_1 || t_2 \oplus r_2 || B_2 || B_3 $$, $$ t^* = \langle r, t_2 \rangle$$ should be a valid tag.
+
+\end{solution}
+\begin{solution}
+  Show that appending the message length to the end of the message before applying basic CBC-MAC does not result in a secure MAC for arbitrary-length messages.
+  
+  The Answer : 
+  
+  Query
+
+* $$m_1 = B_0 || B_1$$, $$t_1 = MAC_k(m_1 || \langle |m_1| \rangle)$$
+* $$m^*_1 = B^*_0 || B^*_1$$,  $$t^*_1 = MAC_k(m^*_1 || \langle |m^*_1| \rangle)$$
+  * $$ |m^*_1| = |m_1|$$
+* $$m_2 = m_1 || \langle |m_1| \rangle || B_2 || B_3$$, $$t_2 = MAC(m_2 || \langle |m_2| \rangle)$$
+
+To be specific, the process of computing $$t_2$$ for message $$m_2$$ is listed below:
+
+* $$c_0=F_k(B_0)$$
+* $$c_1=F_k(c_0 \oplus B_1)$$
+* $$ t_1=F_k(c_1 \oplus \langle |m_1| \rangle) $$
+* $$ c_3=F_k(t_1 \oplus B_2) $$
+* $$ c_4=F_k(c_3 \oplus B_3) $$
+* $$ t=F_k(c_4 \oplus \langle | m_2 | \rangle) $$
+
+Hence, if we change $$m_1$$ to $$ m^*_1 $$,
+
+* $$c^*_0=F_k(B^*_0)$$
+* $$c^*_1=F_k(c^*_0 \oplus B^*_1)$$
+* $$ t^*_1=F_k(c^*_1 \oplus \langle |m^*_1| \rangle) $$
+
+In order to keep the result of MAC, it must hold that $$ t_1 \oplus B_2 = t_1^* \oplus B^*_2$$. Thus
+
+$$
+B^*_2 = t_1 \oplus B_2 \oplus  t_1^*
+$$
+
+Therefore
+
+* $$ c^*_3=F_k(t^*_1 \oplus B^*_2) = F_k(t^*_1 \oplus  t_1 \oplus B_2 \oplus  t_1^*) = F_k(t_1 \oplus B_2) = c_3$$
+* $$ c^*_4 = F_k(c^*_3 \oplus B_3) = F_k(c_3 \oplus B_3) = c_4$$
+* $$ t^* = F_k(c^*_4 \oplus \langle | m^*_2 | \rangle)  = F_k(c_4 \oplus \langle | m_2 | \rangle) =t$$
+  * $$ |m^*_2|=|m_2|$$ can be easily get since $$ |m^*_1| = |m_1| $$
+
+Hence we get a message and its valid tag $$\langle m^*, t^* \rangle $$ where
+
+$$
+m^* := m^*_1 || \langle | m^*_1| \rangle || t_1 \oplus B_2 \oplus  t_1^* || B_3 \\
+t^* = t
+$$
+
+\end{solution}
+\begin{solution}
+  Show two types of forgery attacks for authenticated encryption scheme CBC-XOR.
+  
+  Given a pseudorandom permutation F
+
+  $Gen: k \ll {0, 1}^n$
+
+  Enc: On input a message 
+  m = B_0 || B_1 || ... || B_l \hspace{1mm} 
+  $and a key k, uniformly generate an IV$  \ll ${0, 1}^m$
+    
+    1. Compute B_{l+1} = B_0 || B_1 || ... || B_l
+    
+    2. Do CBC encryption on m || B_{l+1} $using k and IV$
+        
+        - Output ciphertext c := IV || c_0 || c_1 || ... || c_l || c_{l+1}
+        
+
+  Dec: On input a ciphertext c = IV || c_0 || c_1 || ... || c_l || c_{l+1} $and a key k$
+   
+    1. Do CBC decryption on c_0 || c_1 || ... || c_l || c_{l+1} $using k and IV$
+    
+    2. Check if B_{l+1} = B_0 || B_1 || ... || B_l
+        - $If true, output plaintext$ \hspace{1mm} B_0 || B_1 || ... || B_l
+        - $If false, output error$
+
+\newline
+  Answers :
+\newline
+  Method 1 - Truncation
+
+  Query $$ m = B_0 || B_1 || (B_0 \oplus B_1) $$ and obtain the ciphertext $$ c = IV || c_0 || c_1 || c_2 || c_3 $$.
+
+  Thus $$ c^* = IV || c_0 || c_1 || c_2 $$ should be a valid ciphertext for $$m^* = B_0 || B_1$$
+
+  Method 2 - Swap
+
+  Query $$m = B_0 || B_1 || B_2 $$ and obtain the ciphertext $$c = IV || c_0 || c_1 || c_2 || c_3 $$
+
+  Thus
+
+* $$F_k(IV \oplus B_0) = c_0$$
+* $$F_k(c_0 \oplus B_1) = c_1$$
+* $$ F_k(c_1 \oplus B_2) = c_2 $$
+* $$ F_k(c_2 \oplus B_0 \oplus B_1 \oplus B_2) = c_3 $$
+
+Hence $$c^* = IV || c_1 || c_0 || c_2 || c_3$$ should be a valid tag for $$m^* = B^*_1 || B^*_0 || B^*_2$$, where
+
+* $$ B^*_0 = c_0 \oplus B_1 \oplus IV$$
+* $$ B^*_1 = IV \oplus B_0 \oplus c_1$$
+* $$ B^*_2 = c_1 \oplus B_2 \oplus c_0$$
+* $$ B^*_0 \oplus B^*_1 \oplus B^*_2 =  c_0 \oplus B_1 \oplus IV \oplus IV \oplus B_0 \oplus c_1 \oplus c_1 \oplus B_2 \oplus c_0 = B_0 \oplus B_1 \oplus B_2$$
+\end{solution}
+\begin{solution}
+  TODO finish
+\end{solution}
+\section*{Chapter 5}
+\setcounter{section}{5}
+\setcounter{subsection}{5}
+\setcounter{solution-internal}{0}
+\begin{solution}
+  TODO
+\end{solution}
+\begin{solution}
+  TODO
+\end{solution}
+
+\begin{solution}
+  TODO
+\end{solution}
+
+\begin{solution}
+  TODO
+\end{solution}
+
+\begin{solution}
+ Problem
+
+Let \(Gen, $$H$$\) be a collision-resistant hash function. Is \(Gen, $$\hat H$$\) defined by$$\hat H ^s (x) \overset{def}{=} H^s(H^s(x))$$necessarily collision resistant?
+
+* Solution
+
+Assuming that $\hat H$ is not collision-resistent, i.e. 
+
+$$
+\exists x\neq y, \hat H^s(x) = \hat H^s(y)
+$$
+
+Thus $$H^s(H^s(x)) = H^s(H^s(y)) $$
+
+* If $$ H^s(x) = H^s(y)$$, $$(x,y)$$ is a pair of collision for $$H$$
+* If $$ H^s(x) \neq H^s(y)$$, let $$x'=H^s(x)$$, $$y'=H^s(y)$$. 
+  * $$H^s(H^s(x)) = H^s(H^s(y)) $$, $$(x',y')$$ is a pair of collision for $$H$$
+
+Therefore, $\hat H$ is not collision-resistent implies $H$ is not collision-resistent. Then $H$ is collision-resistent implies $\hat H$ is collision-resistent.
+
+\end{solution}
+
+\begin{solution}
+  TODO
+\end{solution}
+
+\begin{solution}
+  TODO
+\end{solution}
+
+
+
+\end{document}
